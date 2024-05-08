@@ -171,10 +171,84 @@ class IOManager {
 
         val input = getValidInput(numberRegex) ?: return
         when (input.toInt()) {
-            1 -> {}
-            2 -> {}
+            1 -> changePlatform()
+            2 -> changeAlgorithm()
         }
         loadConfiguration()
+    }
+
+    private fun changePlatform() {
+        print(
+            """
+                
+                *************
+                  플랫폼 선택
+                *************
+                
+            """.trimIndent()
+        )
+
+        val platforms = Platform.entries
+        platforms.forEachIndexed { idx, platform ->
+            println("  ${idx + 1}. ${platform.krName}")
+        }
+        println("  0. 뒤로 가기")
+        print("\n변경할 플랫폼 번호를 입력하세요.")
+        print("\ninput: ")
+
+        val input = getValidInput(numberRegex) ?: return
+        val num = input.toInt()
+        if (num < platforms.size + 1) {
+            val selectedPlatform = platforms[num - 1]
+            val msg = configurationManager.setConfiguration(
+                platform = selectedPlatform,
+                algorithm = configuration.algorithm
+            )
+            print(msg)
+        } else {
+            print(NOT_EXISTS_NUMBER_ERROR_MSG)
+            changePlatform()
+        }
+    }
+
+    private fun changeAlgorithm() {
+        print(
+            """
+                
+                **************
+                  알고리즘 선택
+                **************
+                
+            """.trimIndent()
+        )
+
+        println("  1. 랜덤")
+        algorithms.forEachIndexed { idx, algorithm ->
+            println("  ${idx + 2}. ${algorithm.krName}")
+        }
+        println("  0. 뒤로 가기")
+        print("\n변경할 알고리즘 번호를 입력하세요.")
+        print("\ninput: ")
+
+        val input = getValidInput(numberRegex) ?: return
+        val num = input.toInt()
+        if (num == 1) {
+            val msg = configurationManager.setConfiguration(
+                platform = configuration.platform,
+                algorithm = null
+            )
+            print(msg)
+        } else if (num < algorithms.size + 2) {
+            val selectedAlgorithm = algorithms[num - 2]
+            val msg = configurationManager.setConfiguration(
+                platform = configuration.platform,
+                algorithm = selectedAlgorithm
+            )
+            print(msg)
+        } else {
+            print(NOT_EXISTS_NUMBER_ERROR_MSG)
+            changeAlgorithm()
+        }
     }
 
     private fun isValidInput(input: String, regex: Regex) = regex.matches(input)
