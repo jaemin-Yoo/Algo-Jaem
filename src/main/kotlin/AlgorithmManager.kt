@@ -3,7 +3,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 
-private const val ALGORITHMS_FILE_PATH = "src/main/kotlin/algorithms.json"
+private const val ALGORITHMS_FILE_PATH = "src/main/kotlin/data/algorithms.json"
 
 @Serializable
 data class Algorithm(
