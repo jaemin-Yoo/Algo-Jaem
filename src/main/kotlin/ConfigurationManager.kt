@@ -18,7 +18,10 @@ data class Configuration(
 class ConfigurationManager {
     private var configuration = Configuration()
 
-    private val json = Json { prettyPrint = true }
+    private val json = Json {
+        prettyPrint = true
+        encodeDefaults = true
+    }
 
     init {
         loadConfiguration()
@@ -43,9 +46,10 @@ class ConfigurationManager {
     fun setConfiguration(
         platform: Platform = Platform.BAEKJOON,
         algorithm: Algorithm? = null
-    ) {
+    ): String {
         configuration = Configuration(platform, algorithm)
         saveConfiguration()
+        return "\n✅ 설정이 변경되었습니다.\n"
     }
 
     fun getConfiguration() = configuration
