@@ -5,8 +5,13 @@ import java.io.File
 
 private const val CONFIG_FILE_PATH = "src/main/kotlin/data/configuration.json"
 
+enum class Platform(val krName: String) {
+    BAEKJOON("백준")
+}
+
 @Serializable
 data class Configuration(
+    val platform: Platform = Platform.BAEKJOON,
     val algorithm: Algorithm? = null,
 )
 
@@ -23,8 +28,10 @@ class ConfigurationManager {
         val file = File(CONFIG_FILE_PATH)
         if (file.exists()) {
             val text = file.readText()
-            val data = json.decodeFromString<Configuration>(text)
-            configuration = data
+            if (text.isNotEmpty()) {
+                val data = json.decodeFromString<Configuration>(text)
+                configuration = data
+            }
         }
     }
 
@@ -33,8 +40,13 @@ class ConfigurationManager {
         File(CONFIG_FILE_PATH).writeText(jsonText)
     }
 
-    fun setConfiguration(algorithm: Algorithm? = null) {
-        configuration = Configuration(algorithm)
+    fun setConfiguration(
+        platform: Platform = Platform.BAEKJOON,
+        algorithm: Algorithm? = null
+    ) {
+        configuration = Configuration(platform, algorithm)
         saveConfiguration()
     }
+
+    fun getConfiguration() = configuration
 }
