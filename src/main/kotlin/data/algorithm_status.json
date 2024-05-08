@@ -1,0 +1,18 @@
+[
+    {
+        "algorithm": {
+            "krName": "구현",
+            "enName": "IMPL",
+            "url": "https://www.naver.com"
+        },
+        "solved": false
+    },
+    {
+        "algorithm": {
+            "krName": "다익스트라",
+            "enName": "DIJK",
+            "url": "https://www.example.com"
+        },
+        "solved": false
+    }
+]
