@@ -2,6 +2,7 @@ import java.io.File
 
 private const val INPUT_ERROR_MSG = "\n❗입력 형식이 맞지 않습니다.❗\n"
 private const val NOT_EXISTS_NUMBER_ERROR_MSG = "\n❗존재하지 않는 번호입니다.❗\n"
+private const val REMOVE_ALGORITHM_ERROR_MSG = "\n❗현재 선택된 알고리즘이 삭제되었기 때문에 [랜덤] 알고리즘으로 변경되었습니다.❗\n"
 private const val NOTE_FILE_PATH = "src/main/kotlin/note.txt"
 
 class IOManager {
@@ -17,9 +18,14 @@ class IOManager {
         get() = configurationManager.getConfiguration()
 
     private val numberRegex = Regex("\\d+")
-    private val addAlgorithmRegex = Regex("[가-힣]+ [A-Z]+(-[A-Z]+)* https?://.*")
+    private val addAlgorithmRegex = Regex("add [가-힣]+(-[가-힣]+)* [a-zA-Z]+(-[a-zA-Z]+)* https?://.*")
+    private val removeAlgorithmRegex = Regex("remove \\d+")
+    private val updateAlgorithmRegex = Regex("update \\d+")
 
     fun start() {
+        val configuration = configurationManager.getConfiguration()
+        val platformName = configuration.platform.krName
+        val algorithmName = configuration.algorithm?.krName ?: "랜덤"
         print(
             """
                 
@@ -27,21 +33,22 @@ class IOManager {
                 🔓 [알고잼] - 알고리즘 문제 풀이 프로그램
                 ************************************
                 
+                플랫폼: $platformName
+                알고리즘: $algorithmName
+                
                   1. 문제 풀기
-                  2. 추가된 알고리즘 보기
-                  3. 환경 설정
+                  2. 환경 설정
                   0. 종료
                 
                 수행할 작업의 번호를 입력하세요.
-                input: 
+                input> 
             """.trimIndent()
         )
 
         val input = getValidInput(numberRegex) ?: return
         when (input.toInt()) {
             1 -> solveProblem()
-            2 -> showAlgorithms()
-            3 -> loadConfiguration()
+            2 -> loadConfiguration()
             else -> print(NOT_EXISTS_NUMBER_ERROR_MSG)
         }
         start()
@@ -56,7 +63,7 @@ class IOManager {
 
         if (algorithm == null) {
             print("\n❗추가된 알고리즘이 존재하지 않습니다. 알고리즘을 추가해주세요.❗\n")
-            addAlgorithm()
+            showAlgorithms()
         } else {
             println("${algorithm.krName} ${algorithm.url}")
 
@@ -65,93 +72,10 @@ class IOManager {
         }
     }
 
-    private fun showAlgorithms() {
-        println(
-            """
-                
-                ********************
-                👁️ 추가된 알고리즘 보기
-                ********************
-                
-            """.trimIndent()
-        )
-        algorithms.forEach { algorithm ->
-            println("${algorithm.krName} - ${algorithm.enName}")
-        }
-        print(
-            """
-                
-              1. 알고리즘 추가
-              2. 알고리즘 삭제
-              0. 뒤로 가기
-            
-            수행할 작업의 번호를 입력하세요.
-            input: 
-            """.trimIndent()
-        )
-
-        val input = getValidInput(numberRegex) ?: return
-        when (input.toInt()) {
-            1 -> addAlgorithm()
-            2 -> removeAlgorithm()
-            else -> print(NOT_EXISTS_NUMBER_ERROR_MSG)
-        }
-        showAlgorithms()
-    }
-
-    private fun addAlgorithm() {
-        print(
-            """
-                
-                **************************************************
-                  추가할 알고리즘을 아래 양식대로 입력하세요.
-                  양식: [한글명] [영문명-대문자] [주소]
-                  ex) 구현 IMPLEMENTATION https://www.example.com
-                **************************************************
-                
-                  0. 뒤로가기
-                
-                input: 
-            """.trimIndent()
-        )
-
-        val input = getValidInput(addAlgorithmRegex) ?: return
-        val (krName, enName, url) = input.split(' ')
-        val msg = algorithmManager.addAlgorithm(Algorithm(krName, enName, url))
-        print(msg)
-    }
-
-    private fun removeAlgorithm() {
-        println(
-            """
-                
-                *********************************
-                  삭제할 알고리즘의 번호를 입력하세요.
-                *********************************
-                
-            """.trimIndent()
-        )
-
-        val algorithms = algorithmManager.getAlgorithms()
-        algorithms.forEachIndexed { idx, (krName, _, _) ->
-            println("  ${idx + 1}. $krName")
-        }
-        println("  0. 뒤로 가기")
-        print("\ninput: ")
-
-        val input = getValidInput(numberRegex) ?: return
-        val msg = algorithmManager.removeAlgorithm(algorithms[input.toInt() - 1])
-        print(msg)
-    }
-
     private fun loadConfiguration() {
         val configuration = configurationManager.getConfiguration()
-        val platform = configuration.platform
-        val algorithm = if (configuration.algorithm == null) {
-            "랜덤"
-        } else {
-            configuration.algorithm.krName
-        }
+        val platformName = configuration.platform.krName
+        val algorithmName = configuration.algorithm?.krName ?: "랜덤"
 
         print(
             """
@@ -160,30 +84,30 @@ class IOManager {
                 🔧 환경 설정
                 ************
                 
-                  1. 플랫폼: ${platform.krName}
-                  2. 알고리즘: $algorithm
+                  1. 플랫폼: $platformName
+                  2. 알고리즘: $algorithmName
                   0. 뒤로 가기
                 
-                변경할 설정의 번호를 입력하세요.
-                input: 
+                관리할 설정의 번호를 입력하세요.
+                input> 
             """.trimIndent()
         )
 
         val input = getValidInput(numberRegex) ?: return
         when (input.toInt()) {
-            1 -> changePlatform()
-            2 -> changeAlgorithm()
+            1 -> updatePlatform()
+            2 -> showAlgorithms()
         }
         loadConfiguration()
     }
 
-    private fun changePlatform() {
-        print(
+    private fun updatePlatform() {
+        println(
             """
                 
-                *************
-                  플랫폼 선택
-                *************
+                **********
+                🏝️ 플랫폼
+                **********
                 
             """.trimIndent()
         )
@@ -194,7 +118,7 @@ class IOManager {
         }
         println("  0. 뒤로 가기")
         print("\n변경할 플랫폼 번호를 입력하세요.")
-        print("\ninput: ")
+        print("\ninput> ")
 
         val input = getValidInput(numberRegex) ?: return
         val num = input.toInt()
@@ -207,17 +131,24 @@ class IOManager {
             print(msg)
         } else {
             print(NOT_EXISTS_NUMBER_ERROR_MSG)
-            changePlatform()
+            updatePlatform()
         }
     }
 
-    private fun changeAlgorithm() {
-        print(
+    private fun showAlgorithms() {
+        println(
             """
                 
-                **************
-                  알고리즘 선택
-                **************
+                ***********
+                🎮 알고리즘
+                ***********
+                
+                <명령어>
+                - 알고리즘 추가: input> add [한글명] [영문명] [주소]
+                  * 띄어쓰기는 '-'로 대체 *
+                - 알고리즘 삭제: input> remove [번호]
+                - 알고리즘 변경: input> update [번호]
+                ex) add 다이나믹-프로그래밍 DYNAMIC-PROGRAMMING https://www.example.com
                 
             """.trimIndent()
         )
@@ -227,28 +158,67 @@ class IOManager {
             println("  ${idx + 2}. ${algorithm.krName}")
         }
         println("  0. 뒤로 가기")
-        print("\n변경할 알고리즘 번호를 입력하세요.")
-        print("\ninput: ")
+        print("\n명령어를 입력하세요.")
+        print("\ninput> ")
 
-        val input = getValidInput(numberRegex) ?: return
-        val num = input.toInt()
-        if (num == 1) {
-            val msg = configurationManager.setConfiguration(
-                platform = configuration.platform,
-                algorithm = null
-            )
-            print(msg)
-        } else if (num < algorithms.size + 2) {
-            val selectedAlgorithm = algorithms[num - 2]
-            val msg = configurationManager.setConfiguration(
-                platform = configuration.platform,
-                algorithm = selectedAlgorithm
-            )
-            print(msg)
-        } else {
-            print(NOT_EXISTS_NUMBER_ERROR_MSG)
-            changeAlgorithm()
+        while (true) {
+            val input = br.readLine()
+            if (input == "0") {
+                return
+            }
+
+            if (addAlgorithmRegex.matches(input)) {
+                val (_, krName, enName, url) = input.split(' ')
+                val msg = algorithmManager.addAlgorithm(Algorithm(krName, enName.uppercase(), url).replaceDashToSpace())
+                print(msg)
+            } else if (removeAlgorithmRegex.matches(input)) {
+                val (_, numStr) = input.split(' ')
+                val num = numStr.toInt()
+                if (num == 1) {
+                    print("\n❗[랜덤]은 삭제할 수 없습니다.❗\n")
+                    continue
+                } else if (num < algorithms.size + 2) {
+                    val configuration = configurationManager.getConfiguration()
+                    val selectedAlgorithm = algorithms[num - 2]
+                    val msg = algorithmManager.removeAlgorithm(selectedAlgorithm)
+                    print(msg)
+                    if (selectedAlgorithm == configuration.algorithm) {
+                        configurationManager.setConfiguration(platform = configuration.platform)
+                        print(REMOVE_ALGORITHM_ERROR_MSG)
+                    }
+                } else {
+                    print(NOT_EXISTS_NUMBER_ERROR_MSG)
+                    continue
+                }
+            } else if (updateAlgorithmRegex.matches(input)) {
+                val (_, numStr) = input.split(' ')
+                val num = numStr.toInt()
+                if (num == 1) {
+                    val msg = configurationManager.setConfiguration(
+                        platform = configuration.platform,
+                        algorithm = null
+                    )
+                    print(msg)
+                    continue
+                } else if (num < algorithms.size + 2) {
+                    val selectedAlgorithm = algorithms[num - 2]
+                    val msg = configurationManager.setConfiguration(
+                        platform = configuration.platform,
+                        algorithm = selectedAlgorithm
+                    )
+                    print(msg)
+                    return
+                } else {
+                    print(NOT_EXISTS_NUMBER_ERROR_MSG)
+                    continue
+                }
+            } else {
+                print(INPUT_ERROR_MSG)
+                continue
+            }
+            break
         }
+        showAlgorithms()
     }
 
     private fun isValidInput(input: String, regex: Regex) = regex.matches(input)
@@ -261,7 +231,7 @@ class IOManager {
 
         while (!isValidInput(input, regex)) {
             print(INPUT_ERROR_MSG)
-            print("input: ")
+            print("input> ")
             input = br.readLine()
         }
         return input
