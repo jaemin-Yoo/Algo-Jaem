@@ -161,9 +161,9 @@ class IOManager {
         }
         println("\n  0. 뒤로 가기")
         print("\n명령어를 입력하세요.")
-        print("\ninput> ")
 
         while (true) {
+            print("\ninput> ")
             val input = br.readLine()
             if (input == "0") {
                 return
