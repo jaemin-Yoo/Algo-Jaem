@@ -33,11 +33,9 @@ class IOManager {
                 🔓 [알고잼] - 알고리즘 문제 풀이 프로그램
                 ************************************
                 
-                플랫폼: $platformName
-                알고리즘: $algorithmName
-                
                   1. 문제 풀기
-                  2. 환경 설정
+                  2. 플랫폼: $platformName
+                  3. 알고리즘: $algorithmName
                   
                   0. 종료
                 
@@ -49,7 +47,8 @@ class IOManager {
         val input = getValidInput(numberRegex) ?: return
         when (input.toInt()) {
             1 -> solveProblem()
-            2 -> loadConfiguration()
+            2 -> updatePlatform()
+            3 -> showAlgorithms()
             else -> print(NOT_EXISTS_NUMBER_ERROR_MSG)
         }
         start()
