@@ -11,7 +11,13 @@ data class Algorithm(
     val krName: String,
     val enName: String,
     val url: String
-)
+) {
+    fun replaceDashToSpace() = Algorithm(
+        krName = krName.replace('-', ' '),
+        enName = enName.replace('-', ' '),
+        url = url
+    )
+}
 
 @Serializable
 data class AlgorithmStatus(
