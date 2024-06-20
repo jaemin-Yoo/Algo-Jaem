@@ -5,13 +5,13 @@ import java.io.File
 
 private const val CONFIG_FILE_PATH = "src/main/kotlin/data/configuration.json"
 
-enum class Platform(val krName: String) {
+enum class PlatformType(val krName: String) {
     BAEKJOON("백준")
 }
 
 @Serializable
 data class Configuration(
-    val platform: Platform = Platform.BAEKJOON,
+    val platformType: PlatformType = PlatformType.BAEKJOON,
     val algorithm: Algorithm? = null,
 )
 
@@ -44,10 +44,10 @@ class ConfigurationManager {
     }
 
     fun setConfiguration(
-        platform: Platform = Platform.BAEKJOON,
+        platformType: PlatformType = PlatformType.BAEKJOON,
         algorithm: Algorithm? = null
     ): String {
-        configuration = Configuration(platform, algorithm)
+        configuration = Configuration(platformType, algorithm)
         saveConfiguration()
         return "\n✅ 설정이 변경되었습니다.\n"
     }

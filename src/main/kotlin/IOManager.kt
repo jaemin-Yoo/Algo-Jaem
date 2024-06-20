@@ -24,7 +24,7 @@ class IOManager {
 
     fun start() {
         val configuration = configurationManager.getConfiguration()
-        val platformName = configuration.platform.krName
+        val platformName = configuration.platformType.krName
         val algorithmName = configuration.algorithm?.krName ?: "랜덤"
         print(
             """
@@ -74,7 +74,7 @@ class IOManager {
 
     private fun loadConfiguration() {
         val configuration = configurationManager.getConfiguration()
-        val platformName = configuration.platform.krName
+        val platformName = configuration.platformType.krName
         val algorithmName = configuration.algorithm?.krName ?: "랜덤"
 
         print(
@@ -113,8 +113,8 @@ class IOManager {
             """.trimIndent()
         )
 
-        val platforms = Platform.entries
-        platforms.forEachIndexed { idx, platform ->
+        val platformTypes = PlatformType.entries
+        platformTypes.forEachIndexed { idx, platform ->
             println("  ${idx + 1}. ${platform.krName}")
         }
         println("\n  0. 뒤로 가기")
@@ -123,10 +123,10 @@ class IOManager {
 
         val input = getValidInput(numberRegex) ?: return
         val num = input.toInt()
-        if (num < platforms.size + 1) {
-            val selectedPlatform = platforms[num - 1]
+        if (num < platformTypes.size + 1) {
+            val selectedPlatform = platformTypes[num - 1]
             val msg = configurationManager.setConfiguration(
-                platform = selectedPlatform,
+                platformType = selectedPlatform,
                 algorithm = configuration.algorithm
             )
             print(msg)
@@ -187,7 +187,7 @@ class IOManager {
                         val msg = algorithmManager.removeAlgorithm(selectedAlgorithm)
                         print(msg)
                         if (selectedAlgorithm == configuration.algorithm) {
-                            configurationManager.setConfiguration(platform = configuration.platform)
+                            configurationManager.setConfiguration(platformType = configuration.platformType)
                             print(REMOVE_ALGORITHM_ERROR_MSG)
                         }
                     }
@@ -201,7 +201,7 @@ class IOManager {
                 if (num == 1) {
                     confirm("변경") {
                         val msg = configurationManager.setConfiguration(
-                            platform = configuration.platform,
+                            platformType = configuration.platformType,
                             algorithm = null
                         )
                         print(msg)
@@ -211,7 +211,7 @@ class IOManager {
                     confirm("변경") {
                         val selectedAlgorithm = algorithms[num - 2]
                         val msg = configurationManager.setConfiguration(
-                            platform = configuration.platform,
+                            platformType = configuration.platformType,
                             algorithm = selectedAlgorithm
                         )
                         print(msg)
