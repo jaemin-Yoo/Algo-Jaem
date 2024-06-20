@@ -24,6 +24,8 @@ object SQLiteManager {
             getConnection().use { conn ->
                 enableForeignKey(conn)
                 createTables(conn)
+                insertPlatform("백준", true)
+                insertPlatform("프로그래머스", false)
             }
         } catch (e: SQLException) {
             println("Error initializing database: ${e.message}")
@@ -106,13 +108,55 @@ object SQLiteManager {
         }
     }
 
-    fun listTables() {
+    fun selectPlatform(): List<Platform> {
+        val sql = """
+            SELECT * FROM platform
+        """.trimIndent()
+
+        val platforms = mutableListOf<Platform>()
         getConnection().use { conn ->
-            val metaData = conn.metaData
-            val tables = metaData.getTables(null, null, "%", arrayOf("TABLE"))
-            while (tables.next()) {
-                println(tables.getString("TABLE_NAME"))
+            val statement = conn.createStatement()
+            val result = statement.executeQuery(sql)
+            while (result.next()) {
+                val id = result.getInt("platform_id")
+                val name = result.getString("name")
+                val existsAlgorithm = result.getBoolean("exists_algorithm")
+                platforms.add(Platform(id, name, existsAlgorithm))
             }
+        }
+        return platforms
+    }
+
+    fun insertPlatform(name: String, existsAlgorithm: Boolean) {
+        val sql = """
+            INSERT INTO platform(name, exists_algorithm) VALUES(?, ?)
+        """.trimIndent()
+
+        var result = "성공적으로 추가하였습니다."
+        try {
+            getConnection().use { conn ->
+                val statement = conn.prepareStatement(sql)
+                statement.setString(1, name)
+                statement.setBoolean(2, existsAlgorithm)
+                statement.executeUpdate()
+            }
+        } catch (e: SQLException) {
+            if (e.message!!.contains("UNIQUE constraint failed")) {
+                result = "중복된 이름이 존재합니다."
+            }
+        }
+        println(result)
+    }
+
+    fun deletePlatform(platformId: Int) {
+        val sql = """
+            DELETE FROM platform WHERE platform_id = ?
+        """.trimIndent()
+
+        getConnection().use { conn ->
+            val statement = conn.prepareStatement(sql)
+            statement.setInt(1, platformId)
+            statement.executeUpdate()
         }
     }
 }
