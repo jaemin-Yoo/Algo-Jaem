@@ -1,31 +1,15 @@
-package data
+package data.database
 
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.SQLException
 
 object SQLiteManager {
-    @Volatile private var connection: Connection? = null
 
-    init {
-        initializeDatabase()
-    }
-
-    @Synchronized
-    fun getConnection(): Connection {
-        if (connection == null || connection?.isClosed == true) {
-            connection = DriverManager.getConnection("jdbc:sqlite:algo_jaem.db")
-        }
-        return connection!!
-    }
-
-    private fun initializeDatabase() {
+    fun initializeDatabase(connection: Connection) {
         try {
-            getConnection().use { conn ->
+            connection.use { conn ->
                 enableForeignKey(conn)
                 createTables(conn)
-                insertPlatform("백준", true)
-                insertPlatform("프로그래머스", false)
             }
         } catch (e: SQLException) {
             println("Error initializing database: ${e.message}")
@@ -105,58 +89,6 @@ object SQLiteManager {
             conn.createStatement().use { statement ->
                 statement.execute(sql)
             }
-        }
-    }
-
-    fun selectPlatform(): List<Platform> {
-        val sql = """
-            SELECT * FROM platform
-        """.trimIndent()
-
-        val platforms = mutableListOf<Platform>()
-        getConnection().use { conn ->
-            val statement = conn.createStatement()
-            val result = statement.executeQuery(sql)
-            while (result.next()) {
-                val id = result.getInt("platform_id")
-                val name = result.getString("name")
-                val existsAlgorithm = result.getBoolean("exists_algorithm")
-                platforms.add(Platform(id, name, existsAlgorithm))
-            }
-        }
-        return platforms
-    }
-
-    fun insertPlatform(name: String, existsAlgorithm: Boolean) {
-        val sql = """
-            INSERT INTO platform(name, exists_algorithm) VALUES(?, ?)
-        """.trimIndent()
-
-        var result = "성공적으로 추가하였습니다."
-        try {
-            getConnection().use { conn ->
-                val statement = conn.prepareStatement(sql)
-                statement.setString(1, name)
-                statement.setBoolean(2, existsAlgorithm)
-                statement.executeUpdate()
-            }
-        } catch (e: SQLException) {
-            if (e.message!!.contains("UNIQUE constraint failed")) {
-                result = "중복된 이름이 존재합니다."
-            }
-        }
-        println(result)
-    }
-
-    fun deletePlatform(platformId: Int) {
-        val sql = """
-            DELETE FROM platform WHERE platform_id = ?
-        """.trimIndent()
-
-        getConnection().use { conn ->
-            val statement = conn.prepareStatement(sql)
-            statement.setInt(1, platformId)
-            statement.executeUpdate()
         }
     }
 }
