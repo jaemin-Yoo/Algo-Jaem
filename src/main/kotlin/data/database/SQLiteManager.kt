@@ -7,19 +7,16 @@ object SQLiteManager {
 
     fun initializeDatabase(connection: Connection) {
         try {
-            connection.use { conn ->
-                enableForeignKey(conn)
-                createTables(conn)
-            }
+            enableForeignKey(connection)
+            createTables(connection)
         } catch (e: SQLException) {
             println("Error initializing database: ${e.message}")
         }
     }
 
-    private fun enableForeignKey(conn: Connection) {
-        conn.createStatement().use { stmt ->
-            stmt.execute("PRAGMA foreign_keys = ON;")
-        }
+    private fun enableForeignKey(connection: Connection) {
+        val stmt = connection.createStatement()
+        stmt.execute("PRAGMA foreign_keys = ON;")
     }
 
     private fun createTables(conn: Connection) {

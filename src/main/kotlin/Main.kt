@@ -9,4 +9,11 @@ fun main() {
     val platformDao = PlatformDao(connection)
     platformDao.insertPlatform("백준", true)
     platformDao.insertPlatform("프로그래머스", false)
+
+    val platforms = platformDao.getPlatforms()
+    platforms.forEach {
+        println(it.toString())
+    }
+
+    connection.close()
 }

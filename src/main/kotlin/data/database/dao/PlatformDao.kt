@@ -12,15 +12,13 @@ class PlatformDao(private val connection: Connection) {
         """.trimIndent()
 
         val platforms = mutableListOf<Platform>()
-        connection.use { conn ->
-            val statement = conn.createStatement()
-            val result = statement.executeQuery(sql)
-            while (result.next()) {
-                val id = result.getInt("platform_id")
-                val name = result.getString("name")
-                val existsAlgorithm = result.getBoolean("exists_algorithm")
-                platforms.add(Platform(id, name, existsAlgorithm))
-            }
+        val statement = connection.createStatement()
+        val result = statement.executeQuery(sql)
+        while (result.next()) {
+            val id = result.getInt("platform_id")
+            val name = result.getString("name")
+            val existsAlgorithm = result.getBoolean("exists_algorithm")
+            platforms.add(Platform(id, name, existsAlgorithm))
         }
         return platforms
     }
@@ -32,12 +30,10 @@ class PlatformDao(private val connection: Connection) {
 
         var result = "성공적으로 추가하였습니다."
         try {
-            connection.use { conn ->
-                val statement = conn.prepareStatement(sql)
-                statement.setString(1, name)
-                statement.setBoolean(2, existsAlgorithm)
-                statement.executeUpdate()
-            }
+            val statement = connection.prepareStatement(sql)
+            statement.setString(1, name)
+            statement.setBoolean(2, existsAlgorithm)
+            statement.executeUpdate()
         } catch (e: SQLException) {
             if (e.message!!.contains("UNIQUE constraint failed")) {
                 result = "중복된 이름이 존재합니다."
@@ -51,10 +47,8 @@ class PlatformDao(private val connection: Connection) {
             DELETE FROM platform WHERE platform_id = ?
         """.trimIndent()
 
-        connection.use { conn ->
-            val statement = conn.prepareStatement(sql)
-            statement.setInt(1, platformId)
-            statement.executeUpdate()
-        }
+        val statement = connection.prepareStatement(sql)
+        statement.setInt(1, platformId)
+        statement.executeUpdate()
     }
 }
